@@ -3,7 +3,7 @@ import includes.DatabaseConnection;
 public class Main {
 
 	public static void main(String[] args) {
-                new Radovi().setVisible(true);
+                new MainMenu().setVisible(true);
 	}
 
 }

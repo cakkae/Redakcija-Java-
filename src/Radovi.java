@@ -17,8 +17,7 @@ import javax.swing.table.DefaultTableModel;
 public class Radovi extends javax.swing.JFrame {
     private Connection conn;
     private int rad_id, status, odluka, casopis_id, pocetna_strana, krajnja_strana;
-    String naziv, redniBrojIzdavanja, redniBrojGodine;
-    java.sql.Date datum_prispeca_recenzije, datum_slanja_recenzije, datum_prispeca_casopisa;
+    String naziv, redniBrojIzdavanja, redniBrojGodine, datum_prispeca_recenzije, datum_slanja_recenzije, datum_prispeca_casopisa;
             
     public Radovi() {
         initComponents();
@@ -39,6 +38,36 @@ public class Radovi extends javax.swing.JFrame {
                     JOptionPane.showMessageDialog(this, ex.getMessage());
                 }
     }
+    
+    int idCasopisa(String naziv)
+    {
+        int id = 0;
+        try {
+            String queryString = "SELECT casopis_id from casopisi where casopisi.naziv = '"+naziv+"'";
+            Statement smt = conn.createStatement();
+            ResultSet resultSet = smt.executeQuery(queryString);
+            if(resultSet.next())
+                id = resultSet.getInt("casopis_id");
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage());
+        }
+        return id;
+    }
+    
+    String nazivCasopisa(int id)
+    {
+        String naziv = "";
+        try {
+            String queryString = "SELECT naziv from casopisi where casopisi.casopis_id = "+id;
+            Statement smt = conn.createStatement();
+            ResultSet resultSet = smt.executeQuery(queryString);
+            if(resultSet.next())
+                naziv = resultSet.getString("naziv");
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage());
+        }
+        return naziv;
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -56,14 +85,12 @@ public class Radovi extends javax.swing.JFrame {
         btnReset = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        autorTable = new javax.swing.JTable();
+        radoviTable = new javax.swing.JTable();
         jPanel4 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         tfNaziv = new javax.swing.JTextField();
         jLabel5 = new javax.swing.JLabel();
         tfDatumPrispjecaCasopisa = new javax.swing.JTextField();
-        jLabel6 = new javax.swing.JLabel();
-        tfOdluka = new javax.swing.JTextField();
         jLabel7 = new javax.swing.JLabel();
         cbCasopis = new javax.swing.JComboBox<>();
         jLabel8 = new javax.swing.JLabel();
@@ -115,7 +142,7 @@ public class Radovi extends javax.swing.JFrame {
 
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
-        autorTable.setModel(new javax.swing.table.DefaultTableModel(
+        radoviTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -126,12 +153,12 @@ public class Radovi extends javax.swing.JFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        autorTable.addMouseListener(new java.awt.event.MouseAdapter() {
+        radoviTable.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                autorTableMouseClicked(evt);
+                radoviTableMouseClicked(evt);
             }
         });
-        jScrollPane1.setViewportView(autorTable);
+        jScrollPane1.setViewportView(radoviTable);
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -144,7 +171,7 @@ public class Radovi extends javax.swing.JFrame {
             .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 260, Short.MAX_VALUE)
         );
 
-        jPanel4.setLayout(new java.awt.GridLayout(5, 4, 10, 25));
+        jPanel4.setLayout(new java.awt.GridLayout(4, 4, 10, 25));
 
         jLabel1.setText("Naziv:");
         jPanel4.add(jLabel1);
@@ -153,10 +180,6 @@ public class Radovi extends javax.swing.JFrame {
         jLabel5.setText("Datum prispjeća časopisa:");
         jPanel4.add(jLabel5);
         jPanel4.add(tfDatumPrispjecaCasopisa);
-
-        jLabel6.setText("Odluka:");
-        jPanel4.add(jLabel6);
-        jPanel4.add(tfOdluka);
 
         jLabel7.setText("Časopis:");
         jPanel4.add(jLabel7);
@@ -222,20 +245,21 @@ public class Radovi extends javax.swing.JFrame {
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
            
         naziv = tfNaziv.getText();
-        odluka = Integer.parseInt(tfOdluka.getText());
-//        casopis_id = Integer.parseInt(tfCasopis.getText());
-        datum_prispeca_casopisa = java.sql.Date.valueOf(tfDatumPrispjecaCasopisa.getText());
+        Object objCasopis = cbCasopis.getSelectedItem();
+        casopis_id = idCasopisa(objCasopis.toString());
+        datum_prispeca_casopisa = tfDatumPrispjecaCasopisa.getText();
         krajnja_strana = Integer.parseInt(tfKrajnjaStrana.getText());
         pocetna_strana = Integer.parseInt(tfPocetnaStrana.getText());
         redniBrojGodine = tfRBrGodine.getText();
         redniBrojIzdavanja = tfRedniBrIzdavanja.getText();
         
-        /*if(!ime.isEmpty() && !prezime.isEmpty() && !adresa.isEmpty() && !telefon.isEmpty() && !email.isEmpty() && !institucija.isEmpty())
+        
+        if(!naziv.isEmpty() && krajnja_strana > 0 && pocetna_strana > 0 && !redniBrojIzdavanja.isEmpty() && !redniBrojGodine.isEmpty())
             {
                 try {
                     Statement smt = conn.createStatement();
-                    smt.execute("insert into autori(ime, prezime, adresa, telefon, email, institucija) "
-                    + "values('"+ime+"', '"+prezime+"', '"+adresa+"', '"+telefon+"', '"+email+"', '"+institucija+"')");
+                    smt.execute("insert into radovi(naziv , casopis_id , datum_prispjeca, rb_godine, rb_sveske, pocetna_strana, krajnja_Strana) "
+                    + "values('"+naziv+"', '"+casopis_id+"', '"+datum_prispeca_casopisa+"', '"+redniBrojGodine+"', '"+redniBrojIzdavanja+"', '"+pocetna_strana+"', '"+krajnja_strana+"')");
                 JOptionPane.showMessageDialog(this, "Uspjesno dodano");
                 smt.close();
                 setTableData();
@@ -245,7 +269,7 @@ public class Radovi extends javax.swing.JFrame {
                 }
             } else {
                 JOptionPane.showMessageDialog(this, "Molimo popunite sva polja!");
-            }*/
+            }
          
     }//GEN-LAST:event_btnAddActionPerformed
 
@@ -253,25 +277,26 @@ public class Radovi extends javax.swing.JFrame {
        resetData();
     }//GEN-LAST:event_btnResetActionPerformed
 
-    private void autorTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_autorTableMouseClicked
-        /*try {
-            autor_id = Integer.parseInt(autorTable.getValueAt(autorTable.getSelectedRow(), 0).toString());
+    private void radoviTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_radoviTableMouseClicked
+        try {
+            rad_id = Integer.parseInt(radoviTable.getValueAt(radoviTable.getSelectedRow(), 0).toString());
             Statement smt = conn.createStatement();
-            ResultSet rs = smt.executeQuery("select * from autori where autor_id ="+autor_id);
+            ResultSet rs = smt.executeQuery("select * from radovi where rad_id ="+rad_id);
             if(rs.next()) {
-                tfIme.setText(rs.getString(2));
-                tfPrezime.setText(rs.getString(3));
-                tfAdresa.setText(rs.getString(4));
-                tfTelefon.setText(rs.getString(5));
-                tfEmail.setText(rs.getString(6));
-                tfInstitucija.setText(rs.getString(7));
+                tfNaziv.setText(rs.getString(2));
+                cbCasopis.setSelectedItem(nazivCasopisa(rs.getInt(3)));
+                tfDatumPrispjecaCasopisa.setText(rs.getString(4));
+                tfRBrGodine.setText(rs.getString(5));
+                tfRedniBrIzdavanja.setText(rs.getString(6));
+                tfPocetnaStrana.setText(rs.getString(7));
+                tfKrajnjaStrana.setText(rs.getString(8));
             }
             rs.close();
             smt.close();
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, ex);
-        }*/
-    }//GEN-LAST:event_autorTableMouseClicked
+        }
+    }//GEN-LAST:event_radoviTableMouseClicked
 
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
         /*if(autor_id != 0)
@@ -322,12 +347,12 @@ public class Radovi extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void resetData() {
-      /*  tfIme.setText("");
-        tfPrezime.setText("");
-        tfAdresa.setText("");
-        tfTelefon.setText("");
-        tfEmail.setText("");
-        tfInstitucija.setText("");*/
+        tfNaziv.setText("");
+        tfDatumPrispjecaCasopisa.setText("");
+        tfRBrGodine.setText("");
+        tfRedniBrIzdavanja.setText("");
+        tfKrajnjaStrana.setText("");
+        tfPocetnaStrana.setText("");
     }
     private void setTableData() {
         try {
@@ -341,21 +366,22 @@ public class Radovi extends javax.swing.JFrame {
                 rs.beforeFirst();
             }
             
-            String[][] data = new String[rows][7];
+            String[][] data = new String[rows][8];
             while(rs.next())
             {
                 data[rowIndex][0] = rs.getInt(1)+"";
                 data[rowIndex][1] = rs.getString(2);
-                data[rowIndex][2] = rs.getString(3);
+                data[rowIndex][2] = nazivCasopisa(rs.getInt(3));
                 data[rowIndex][3] = rs.getString(4);
                 data[rowIndex][4] = rs.getString(5);
                 data[rowIndex][5] = rs.getString(6);
                 data[rowIndex][6] = rs.getString(7);
+                data[rowIndex][7] = rs.getString(8);
                 rowIndex++;
             }
-            String[] cols = {"ID", "Ime", "Prezime", "Adresa", "Telefon", "Email", "Institucija"};
+            String[] cols = {"ID", "Naziv", "Casopis", "Datum prispjeca", "R.br. godine", "R.br. sveske", "Pocetna strana", "Krajnja strana"};
             DefaultTableModel model = new DefaultTableModel(data, cols);
-            autorTable.setModel(model);
+            radoviTable.setModel(model);
             
             rs.close();
             smt.close();
@@ -402,7 +428,6 @@ public class Radovi extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JTable autorTable;
     private javax.swing.JButton btnAdd;
     private javax.swing.JButton btnDelete;
     private javax.swing.JButton btnReset;
@@ -413,7 +438,6 @@ public class Radovi extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
@@ -421,10 +445,10 @@ public class Radovi extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTable radoviTable;
     private javax.swing.JTextField tfDatumPrispjecaCasopisa;
     private javax.swing.JTextField tfKrajnjaStrana;
     private javax.swing.JTextField tfNaziv;
-    private javax.swing.JTextField tfOdluka;
     private javax.swing.JTextField tfPocetnaStrana;
     private javax.swing.JTextField tfRBrGodine;
     private javax.swing.JTextField tfRedniBrIzdavanja;

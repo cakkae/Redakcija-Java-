@@ -64,15 +64,12 @@
           </Border>
         </Property>
       </Properties>
-      <AccessibilityProperties>
-        <Property name="AccessibleContext.accessibleName" type="java.lang.String" value="Dodavanje recezenata za rad"/>
-      </AccessibilityProperties>
 
       <Layout class="org.netbeans.modules.form.compat2.layouts.DesignGridLayout">
         <Property name="columns" type="int" value="2"/>
         <Property name="horizontalGap" type="int" value="15"/>
-        <Property name="rows" type="int" value="2"/>
-        <Property name="verticalGap" type="int" value="25"/>
+        <Property name="rows" type="int" value="5"/>
+        <Property name="verticalGap" type="int" value="15"/>
       </Layout>
       <SubComponents>
         <Component class="javax.swing.JLabel" name="jLabel7">
@@ -82,6 +79,22 @@
           </Properties>
         </Component>
         <Component class="javax.swing.JComboBox" name="cbRecezent">
+          <Properties>
+            <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
+              <StringArray count="0"/>
+            </Property>
+          </Properties>
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
+          </AuxValues>
+        </Component>
+        <Component class="javax.swing.JLabel" name="jLabel8">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Izaberite rad:"/>
+            <Property name="toolTipText" type="java.lang.String" value=""/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JComboBox" name="cbRad">
           <Properties>
             <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
               <StringArray count="0"/>
@@ -109,6 +122,20 @@
           <AuxValues>
             <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
           </AuxValues>
+        </Component>
+        <Component class="javax.swing.JLabel" name="jLabel4">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Datum slanja:"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JTextField" name="tfDatumSlanja">
+        </Component>
+        <Component class="javax.swing.JLabel" name="jLabel5">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Datum dobijanja:"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JTextField" name="tfDatumDobijanja">
         </Component>
       </SubComponents>
     </Container>
@@ -190,7 +217,7 @@
 
           <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
           <SubComponents>
-            <Component class="javax.swing.JTable" name="autorTable">
+            <Component class="javax.swing.JTable" name="radRecezentTable">
               <Properties>
                 <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.editors2.TableModelEditor">
                   <Table columnCount="4" rowCount="4">
@@ -202,7 +229,7 @@
                 </Property>
               </Properties>
               <Events>
-                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="autorTableMouseClicked"/>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="radRecezentTableMouseClicked"/>
               </Events>
             </Component>
           </SubComponents>

@@ -5,6 +5,7 @@
  */
 
 
+import com.sun.xml.internal.ws.util.StringUtils;
 import includes.DatabaseConnection;
 import java.awt.event.WindowEvent;
 import java.sql.Connection;
@@ -12,6 +13,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -23,12 +25,10 @@ import javax.swing.table.DefaultTableModel;
  */
 public class RecezentRadovi extends javax.swing.JFrame {
     private Connection conn;
-    private int autor_id;
+    private int recezent_radovi_id, odluka;
     
-    String ime, prezime, adresa, telefon, email, institucija;
-    JFormattedTextField tfDatumSlanja, tfDatumDobijanja;
-    JLabel lblDatumSlanja, lblDatumDobijanja;
-            
+    String recezent_id, datumSlanja, datumDobijanja, rad_id;
+    
     public RecezentRadovi() {
         initComponents();
         DatabaseConnection dbc = DatabaseConnection.getDatabaseConnection();
@@ -42,21 +42,97 @@ public class RecezentRadovi extends javax.swing.JFrame {
                 int colCount = metaData.getColumnCount();
                 while(resultSet.next())
                 {
-                    cbRecezent.addItem(resultSet.getString(2).concat(resultSet.getString(3)));
+                    cbRecezent.addItem(resultSet.getString(2).concat(" ").concat(resultSet.getString(3)));
                 }
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage());
             }
-            lblDatumDobijanja = new JLabel("Datum dobijanja recenzije:");
-            lblDatumSlanja = new JLabel("Datum slanja recenzije:");
-            jPanel1.add(lblDatumSlanja);
-            tfDatumSlanja = new JFormattedTextField(new SimpleDateFormat("dd/MM/yyyy"));
-            tfDatumSlanja.setValue(new java.util.Date()); // today
-            jPanel1.add(tfDatumSlanja);
-            jPanel1.add(lblDatumDobijanja);
-            tfDatumDobijanja = new JFormattedTextField(new SimpleDateFormat("dd/MM/yyyy"));
-            tfDatumDobijanja.setValue(new java.util.Date()); // today
-            jPanel1.add(tfDatumDobijanja);
+            
+            try {
+                String queryString = "SELECT * from radovi";
+                Statement smt = conn.createStatement();
+                ResultSet resultSet = smt.executeQuery(queryString);
+                ResultSetMetaData metaData = resultSet.getMetaData();
+                int colCount = metaData.getColumnCount();
+                while(resultSet.next())
+                {
+                    cbRad.addItem(resultSet.getString(2));
+                }
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage());
+            }
+    }
+    
+    int idRad(String naziv)
+    {
+        int id = 0;
+        try {
+            String queryString = "SELECT rad_id from radovi where radovi.naziv = '"+naziv+"'";
+            Statement smt = conn.createStatement();
+            ResultSet resultSet = smt.executeQuery(queryString);
+            if(resultSet.next())
+                id = resultSet.getInt("rad_id");
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage());
+        }
+        return id;
+    }
+    
+    String nazivRada(int id)
+    {
+        String naziv = "";
+        try {
+            String queryString = "SELECT naziv from radovi where radovi.rad_id = "+id;
+            Statement smt = conn.createStatement();
+            ResultSet resultSet = smt.executeQuery(queryString);
+            if(resultSet.next())
+                naziv = resultSet.getString("naziv");
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage());
+        }
+        return naziv;
+    }
+    
+    String prikaziOdluku(int id)
+    {
+        String odluka = "";
+        if(id == 0)   
+            odluka = "Odbija se";
+        else if(id == 1)
+            odluka = "Prihvata se";
+        return odluka;
+    }
+    
+     String imeRecezenta(int id)
+    {
+        String naziv = "";
+        try {
+            String queryString = "SELECT ime, prezime from recezenti where recezenti.recezent_id = "+id;
+            Statement smt = conn.createStatement();
+            ResultSet resultSet = smt.executeQuery(queryString);
+            if(resultSet.next())
+                naziv = resultSet.getString("ime").concat(" ").concat(resultSet.getString("prezime"));
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage());
+        }
+        return naziv;
+    }
+     
+    int idRecezent(String naziv)
+    {
+        String[] splited = naziv.split("\\s+");
+
+        int id = 0;
+        try {
+            String queryString = "SELECT recezent_id from recezenti where recezenti.ime = '"+splited[0]+"' AND recezenti.prezime = '"+splited[1]+"'";
+            Statement smt = conn.createStatement();
+            ResultSet resultSet = smt.executeQuery(queryString);
+            if(resultSet.next())
+                id = resultSet.getInt("recezent_id");
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage());
+        }
+        return id;
     }
 
     /**
@@ -71,8 +147,14 @@ public class RecezentRadovi extends javax.swing.JFrame {
         jPanel1 = new javax.swing.JPanel();
         jLabel7 = new javax.swing.JLabel();
         cbRecezent = new javax.swing.JComboBox<>();
+        jLabel8 = new javax.swing.JLabel();
+        cbRad = new javax.swing.JComboBox<>();
         jLabel3 = new javax.swing.JLabel();
         cbOdluka = new javax.swing.JComboBox<>();
+        jLabel4 = new javax.swing.JLabel();
+        tfDatumSlanja = new javax.swing.JTextField();
+        jLabel5 = new javax.swing.JLabel();
+        tfDatumDobijanja = new javax.swing.JTextField();
         jPanel2 = new javax.swing.JPanel();
         btnAdd = new javax.swing.JButton();
         btnUpdate = new javax.swing.JButton();
@@ -80,13 +162,13 @@ public class RecezentRadovi extends javax.swing.JFrame {
         btnReset = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        autorTable = new javax.swing.JTable();
+        radRecezentTable = new javax.swing.JTable();
         jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Dodavanje recezenata za rad"));
-        jPanel1.setLayout(new java.awt.GridLayout(2, 2, 15, 25));
+        jPanel1.setLayout(new java.awt.GridLayout(5, 2, 15, 15));
 
         jLabel7.setText("Izaberite recezenta:");
         jLabel7.setToolTipText("");
@@ -94,12 +176,26 @@ public class RecezentRadovi extends javax.swing.JFrame {
 
         jPanel1.add(cbRecezent);
 
+        jLabel8.setText("Izaberite rad:");
+        jLabel8.setToolTipText("");
+        jPanel1.add(jLabel8);
+
+        jPanel1.add(cbRad);
+
         jLabel3.setText("Odluka:");
         jPanel1.add(jLabel3);
 
         cbOdluka.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Odbija se", "Prihvata se" }));
         cbOdluka.setSelectedIndex(1);
         jPanel1.add(cbOdluka);
+
+        jLabel4.setText("Datum slanja:");
+        jPanel1.add(jLabel4);
+        jPanel1.add(tfDatumSlanja);
+
+        jLabel5.setText("Datum dobijanja:");
+        jPanel1.add(jLabel5);
+        jPanel1.add(tfDatumDobijanja);
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
         jPanel2.setLayout(new java.awt.GridLayout(1, 4, 10, 0));
@@ -138,7 +234,7 @@ public class RecezentRadovi extends javax.swing.JFrame {
 
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
-        autorTable.setModel(new javax.swing.table.DefaultTableModel(
+        radRecezentTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -149,12 +245,12 @@ public class RecezentRadovi extends javax.swing.JFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        autorTable.addMouseListener(new java.awt.event.MouseAdapter() {
+        radRecezentTable.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                autorTableMouseClicked(evt);
+                radRecezentTableMouseClicked(evt);
             }
         });
-        jScrollPane1.setViewportView(autorTable);
+        jScrollPane1.setViewportView(radRecezentTable);
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -204,24 +300,29 @@ public class RecezentRadovi extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        jPanel1.getAccessibleContext().setAccessibleName("Dodavanje recezenata za rad");
-
         pack();
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
            
-        ime = tfDatumSlanja.getText();
-        prezime = tfDatumDobijanja.getText();
+        Object objRecezent = cbRecezent.getSelectedItem();
+        recezent_id = objRecezent.toString();
         
+        Object objRad = cbRad.getSelectedItem();
+        rad_id = objRad.toString();
         
-        if(!ime.isEmpty() && !prezime.isEmpty() && !adresa.isEmpty() && !telefon.isEmpty() && !email.isEmpty() && !institucija.isEmpty())
+        odluka = cbOdluka.getSelectedIndex();
+        datumSlanja = tfDatumSlanja.getText();
+        datumDobijanja = tfDatumDobijanja.getText();
+        System.out.println(recezent_id+" "+odluka+" "+datumSlanja+" "+datumDobijanja+" "+rad_id);
+          
+        if(!datumSlanja.isEmpty() && !datumDobijanja.isEmpty() && recezent_id != null && rad_id != null)
             {
                 try {
                     Statement smt = conn.createStatement();
-                    smt.execute("insert into autori(ime, prezime, adresa, telefon, email, institucija) "
-                    + "values('"+ime+"', '"+prezime+"', '"+adresa+"', '"+telefon+"', '"+email+"', '"+institucija+"')");
+                    smt.execute("insert into rad_recezent(rad_id, recezent_id, odluka, datum_slanja_recenzije, datum_dobijanja_recenzije) "
+                    + "values('"+idRad(rad_id)+"', '"+idRecezent(recezent_id)+"', '"+odluka+"', '"+datumSlanja+"', '"+datumDobijanja+"')");
                 JOptionPane.showMessageDialog(this, "Uspjesno dodano");
                 smt.close();
                 setTableData();
@@ -239,35 +340,47 @@ public class RecezentRadovi extends javax.swing.JFrame {
        resetData();
     }//GEN-LAST:event_btnResetActionPerformed
 
-    private void autorTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_autorTableMouseClicked
+    private void radRecezentTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_radRecezentTableMouseClicked
         try {
-            autor_id = Integer.parseInt(autorTable.getValueAt(autorTable.getSelectedRow(), 0).toString());
+            recezent_radovi_id = Integer.parseInt(radRecezentTable.getValueAt(radRecezentTable.getSelectedRow(), 0).toString());
             Statement smt = conn.createStatement();
-            ResultSet rs = smt.executeQuery("select * from autori where autor_id ="+autor_id);
+            ResultSet rs = smt.executeQuery("select * from rad_recezent where rad_recezent_id ="+recezent_radovi_id);
             if(rs.next()) {
-                tfDatumSlanja.setText(rs.getString(2));
-                tfDatumDobijanja.setText(rs.getString(3));
+                cbRad.setSelectedIndex(rs.getInt(2)-1);
+                cbRecezent.setSelectedIndex(rs.getInt(3)-1);
+                cbOdluka.setSelectedIndex(rs.getInt(4));
+                tfDatumSlanja.setText(rs.getString(5));
+                tfDatumDobijanja.setText(rs.getString(6));
             }
             rs.close();
             smt.close();
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, ex);
         }
-    }//GEN-LAST:event_autorTableMouseClicked
+    }//GEN-LAST:event_radRecezentTableMouseClicked
 
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
-        if(autor_id != 0)
+        if(recezent_radovi_id != 0)
         {
-            ime = tfDatumSlanja.getText();
-            prezime = tfDatumDobijanja.getText();
+            Object objRecezent = cbRecezent.getSelectedItem();
+            recezent_id = objRecezent.toString();
+
+            Object objRad = cbRad.getSelectedItem();
+            rad_id = objRad.toString();
+
+            odluka = cbOdluka.getSelectedIndex();
+            System.out.println(odluka);
+            
+            datumSlanja = tfDatumSlanja.getText();
+            datumDobijanja = tfDatumDobijanja.getText();
             
             try {
                 Statement smt = conn.createStatement();
-                smt.executeUpdate("update autori set ime='"+ime+"', prezime='"+prezime+"', adresa='"+adresa+"', telefon='"+telefon+"', email='"+email+"', institucija='"+institucija+"' where autor_id="+autor_id);
-                JOptionPane.showMessageDialog(this, "Autor azuriran");
+                smt.executeUpdate("update rad_recezent set rad_id="+idRad(rad_id)+", recezent_id="+idRecezent(recezent_id)+", odluka="+odluka+", datum_slanja_recenzije='"+datumSlanja+"', datum_dobijanja_recenzije='"+datumDobijanja+"' where rad_recezent_id="+recezent_radovi_id);
+                JOptionPane.showMessageDialog(this, "Recenzija azurirana");
                 setTableData();
                 resetData();
-                autor_id = 0;
+                recezent_radovi_id = 0;
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Ne moze se azurirati zapis..."+" "+ex.getMessage());
             }
@@ -275,15 +388,15 @@ public class RecezentRadovi extends javax.swing.JFrame {
     }//GEN-LAST:event_btnUpdateActionPerformed
 
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
-        if(autor_id != 0) 
+       if(recezent_radovi_id != 0) 
         {
             try {
                Statement smt = conn.createStatement(); 
-               smt.execute("delete from autori where autor_id = "+autor_id);
-               JOptionPane.showMessageDialog(this, "Autor uspješno izbrisan");
+               smt.execute("delete from rad_recezent where rad_recezent_id = "+recezent_radovi_id);
+               JOptionPane.showMessageDialog(this, "Recenzija uspješno izbrisana");
                setTableData();
                resetData();
-               autor_id = 0;
+               recezent_radovi_id = 0;
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Zapis se ne moze izbrisati... "+ex.getMessage());
             }
@@ -308,28 +421,27 @@ public class RecezentRadovi extends javax.swing.JFrame {
             int rows = 0;
             int rowIndex = 0;
             Statement smt = conn.createStatement();
-            ResultSet rs = smt.executeQuery("select * from autori order by autor_id desc");
+            ResultSet rs = smt.executeQuery("select * from rad_recezent order by rad_recezent_id desc");
             if (rs.next()) {
                 rs.last();
                 rows = rs.getRow();
                 rs.beforeFirst();
             }
             
-            String[][] data = new String[rows][7];
+            String[][] data = new String[rows][6];
             while(rs.next())
             {
                 data[rowIndex][0] = rs.getInt(1)+"";
-                data[rowIndex][1] = rs.getString(2);
-                data[rowIndex][2] = rs.getString(3);
-                data[rowIndex][3] = rs.getString(4);
+                data[rowIndex][1] = nazivRada(rs.getInt(2));
+                data[rowIndex][2] = imeRecezenta(rs.getInt(3));
+                data[rowIndex][3] = prikaziOdluku(rs.getInt(4));
                 data[rowIndex][4] = rs.getString(5);
                 data[rowIndex][5] = rs.getString(6);
-                data[rowIndex][6] = rs.getString(7);
                 rowIndex++;
             }
-            String[] cols = {"ID", "Ime", "Prezime", "Adresa", "Telefon", "Email", "Institucija"};
+            String[] cols = {"ID", "Rad", "Recezent", "Odluka", "Datum slanja", "Datum dobijanja"};
             DefaultTableModel model = new DefaultTableModel(data, cols);
-            autorTable.setModel(model);
+            radRecezentTable.setModel(model);
             
             rs.close();
             smt.close();
@@ -376,19 +488,25 @@ public class RecezentRadovi extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JTable autorTable;
     private javax.swing.JButton btnAdd;
     private javax.swing.JButton btnDelete;
     private javax.swing.JButton btnReset;
     private javax.swing.JButton btnUpdate;
     private javax.swing.JComboBox<String> cbOdluka;
+    private javax.swing.JComboBox<String> cbRad;
     private javax.swing.JComboBox<String> cbRecezent;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTable radRecezentTable;
+    private javax.swing.JTextField tfDatumDobijanja;
+    private javax.swing.JTextField tfDatumSlanja;
     // End of variables declaration//GEN-END:variables
 }

@@ -21,7 +21,7 @@ public class Casopisi extends javax.swing.JFrame {
     private int casopis_id;
     
     String naziv, urednik;
-    Integer broj_izlazaka, godina_osnivanja, broj_osoba_redakcije;
+    int broj_izlazaka, godina_osnivanja, broj_osoba_redakcije;
             
     public Casopisi() {
         initComponents();
@@ -203,6 +203,7 @@ public class Casopisi extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_tfNazivActionPerformed
 
+      
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
            
         naziv = tfNaziv.getText();

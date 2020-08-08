@@ -3,7 +3,7 @@ import java.sql.*;
 
 public class DatabaseConnection {
     
-    String dbURL = "jdbc:mysql://localhost:3306/magazin";
+    String dbURL = "jdbc:mysql://localhost:3306/redakcija";
     String username = "root";
     String password = "";
 

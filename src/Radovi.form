@@ -133,7 +133,7 @@
 
           <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
           <SubComponents>
-            <Component class="javax.swing.JTable" name="autorTable">
+            <Component class="javax.swing.JTable" name="radoviTable">
               <Properties>
                 <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.editors2.TableModelEditor">
                   <Table columnCount="4" rowCount="4">
@@ -145,7 +145,7 @@
                 </Property>
               </Properties>
               <Events>
-                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="autorTableMouseClicked"/>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="radoviTableMouseClicked"/>
               </Events>
             </Component>
           </SubComponents>
@@ -157,7 +157,7 @@
       <Layout class="org.netbeans.modules.form.compat2.layouts.DesignGridLayout">
         <Property name="columns" type="int" value="4"/>
         <Property name="horizontalGap" type="int" value="10"/>
-        <Property name="rows" type="int" value="5"/>
+        <Property name="rows" type="int" value="4"/>
         <Property name="verticalGap" type="int" value="25"/>
       </Layout>
       <SubComponents>
@@ -174,13 +174,6 @@
           </Properties>
         </Component>
         <Component class="javax.swing.JTextField" name="tfDatumPrispjecaCasopisa">
-        </Component>
-        <Component class="javax.swing.JLabel" name="jLabel6">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Odluka:"/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JTextField" name="tfOdluka">
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel7">
           <Properties>
