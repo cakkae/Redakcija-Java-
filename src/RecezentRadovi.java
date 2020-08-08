@@ -6,9 +6,14 @@
 
 
 import includes.DatabaseConnection;
+import java.awt.event.WindowEvent;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
+import javax.swing.JFormattedTextField;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
@@ -16,18 +21,42 @@ import javax.swing.table.DefaultTableModel;
  *
  * @author Client
  */
-public class Casopisi extends javax.swing.JFrame {
+public class RecezentRadovi extends javax.swing.JFrame {
     private Connection conn;
-    private int casopis_id;
+    private int autor_id;
     
-    String naziv, urednik;
-    Integer broj_izlazaka, godina_osnivanja, broj_osoba_redakcije;
+    String ime, prezime, adresa, telefon, email, institucija;
+    JFormattedTextField tfDatumSlanja, tfDatumDobijanja;
+    JLabel lblDatumSlanja, lblDatumDobijanja;
             
-    public Casopisi() {
+    public RecezentRadovi() {
         initComponents();
         DatabaseConnection dbc = DatabaseConnection.getDatabaseConnection();
             conn = dbc.getConnection();
             setTableData();
+            try {
+                String queryString = "SELECT * from recezenti";
+                Statement smt = conn.createStatement();
+                ResultSet resultSet = smt.executeQuery(queryString);
+                ResultSetMetaData metaData = resultSet.getMetaData();
+                int colCount = metaData.getColumnCount();
+                while(resultSet.next())
+                {
+                    cbRecezent.addItem(resultSet.getString(2).concat(resultSet.getString(3)));
+                }
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage());
+            }
+            lblDatumDobijanja = new JLabel("Datum dobijanja recenzije:");
+            lblDatumSlanja = new JLabel("Datum slanja recenzije:");
+            jPanel1.add(lblDatumSlanja);
+            tfDatumSlanja = new JFormattedTextField(new SimpleDateFormat("dd/MM/yyyy"));
+            tfDatumSlanja.setValue(new java.util.Date()); // today
+            jPanel1.add(tfDatumSlanja);
+            jPanel1.add(lblDatumDobijanja);
+            tfDatumDobijanja = new JFormattedTextField(new SimpleDateFormat("dd/MM/yyyy"));
+            tfDatumDobijanja.setValue(new java.util.Date()); // today
+            jPanel1.add(tfDatumDobijanja);
     }
 
     /**
@@ -40,16 +69,10 @@ public class Casopisi extends javax.swing.JFrame {
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
-        tfNaziv = new javax.swing.JTextField();
-        jLabel2 = new javax.swing.JLabel();
-        tfBrojIzlazaka = new javax.swing.JTextField();
+        jLabel7 = new javax.swing.JLabel();
+        cbRecezent = new javax.swing.JComboBox<>();
         jLabel3 = new javax.swing.JLabel();
-        tfGodinaOsnivanja = new javax.swing.JTextField();
-        jLabel4 = new javax.swing.JLabel();
-        tfUrednik = new javax.swing.JTextField();
-        jLabel5 = new javax.swing.JLabel();
-        tfUkupanBrojRedakcije = new javax.swing.JTextField();
+        cbOdluka = new javax.swing.JComboBox<>();
         jPanel2 = new javax.swing.JPanel();
         btnAdd = new javax.swing.JButton();
         btnUpdate = new javax.swing.JButton();
@@ -57,41 +80,26 @@ public class Casopisi extends javax.swing.JFrame {
         btnReset = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        casopisTable = new javax.swing.JTable();
-        jButton2 = new javax.swing.JButton();
+        autorTable = new javax.swing.JTable();
+        jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Casopisi"));
-        jPanel1.setLayout(new java.awt.GridLayout(5, 2, 10, 20));
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Dodavanje recezenata za rad"));
+        jPanel1.setLayout(new java.awt.GridLayout(2, 2, 15, 25));
 
-        jLabel1.setText("Naziv:");
-        jPanel1.add(jLabel1);
+        jLabel7.setText("Izaberite recezenta:");
+        jLabel7.setToolTipText("");
+        jPanel1.add(jLabel7);
 
-        tfNaziv.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                tfNazivActionPerformed(evt);
-            }
-        });
-        jPanel1.add(tfNaziv);
+        jPanel1.add(cbRecezent);
 
-        jLabel2.setText("Broj izlazaka:");
-        jPanel1.add(jLabel2);
-        jPanel1.add(tfBrojIzlazaka);
-
-        jLabel3.setText("Godina osnivanja:");
+        jLabel3.setText("Odluka:");
         jPanel1.add(jLabel3);
-        jPanel1.add(tfGodinaOsnivanja);
 
-        jLabel4.setText("Urednik:");
-        jPanel1.add(jLabel4);
-
-        tfUrednik.setToolTipText("");
-        jPanel1.add(tfUrednik);
-
-        jLabel5.setText("Ukupan broj redakcije:");
-        jPanel1.add(jLabel5);
-        jPanel1.add(tfUkupanBrojRedakcije);
+        cbOdluka.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Odbija se", "Prihvata se" }));
+        cbOdluka.setSelectedIndex(1);
+        jPanel1.add(cbOdluka);
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
         jPanel2.setLayout(new java.awt.GridLayout(1, 4, 10, 0));
@@ -130,7 +138,7 @@ public class Casopisi extends javax.swing.JFrame {
 
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
-        casopisTable.setModel(new javax.swing.table.DefaultTableModel(
+        autorTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -141,12 +149,12 @@ public class Casopisi extends javax.swing.JFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        casopisTable.addMouseListener(new java.awt.event.MouseAdapter() {
+        autorTable.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                casopisTableMouseClicked(evt);
+                autorTableMouseClicked(evt);
             }
         });
-        jScrollPane1.setViewportView(casopisTable);
+        jScrollPane1.setViewportView(autorTable);
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -159,10 +167,10 @@ public class Casopisi extends javax.swing.JFrame {
             .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 260, Short.MAX_VALUE)
         );
 
-        jButton2.setText("Vrati se");
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
+        jButton1.setText("Vrati se");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                jButton1ActionPerformed(evt);
             }
         });
 
@@ -170,24 +178,25 @@ public class Casopisi extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
+            .addGroup(layout.createSequentialGroup()
+                .addGap(20, 20, 20)
+                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jButton2)
+                .addGap(10, 10, 10)
+                .addComponent(jButton1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 248, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 242, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -195,28 +204,24 @@ public class Casopisi extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
+        jPanel1.getAccessibleContext().setAccessibleName("Dodavanje recezenata za rad");
+
         pack();
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void tfNazivActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tfNazivActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_tfNazivActionPerformed
-
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
            
-        naziv = tfNaziv.getText();
-        urednik = tfUrednik.getText();
-        broj_izlazaka = Integer.parseInt(tfBrojIzlazaka.getText());
-        godina_osnivanja = Integer.parseInt(tfGodinaOsnivanja.getText());
-        broj_osoba_redakcije = Integer.parseInt(tfUkupanBrojRedakcije.getText());
+        ime = tfDatumSlanja.getText();
+        prezime = tfDatumDobijanja.getText();
         
-        if(!naziv.isEmpty() && !urednik.isEmpty() && broj_izlazaka > 0)
+        
+        if(!ime.isEmpty() && !prezime.isEmpty() && !adresa.isEmpty() && !telefon.isEmpty() && !email.isEmpty() && !institucija.isEmpty())
             {
                 try {
                     Statement smt = conn.createStatement();
-                    smt.execute("insert into casopisi(naziv, broj_izlazaka, godina_osnivanja, urednik, broj_osoba_redakcije) "
-                    + "values('"+naziv+"', '"+broj_izlazaka+"', '"+godina_osnivanja+"', '"+urednik+"', '"+broj_osoba_redakcije+"')");
+                    smt.execute("insert into autori(ime, prezime, adresa, telefon, email, institucija) "
+                    + "values('"+ime+"', '"+prezime+"', '"+adresa+"', '"+telefon+"', '"+email+"', '"+institucija+"')");
                 JOptionPane.showMessageDialog(this, "Uspjesno dodano");
                 smt.close();
                 setTableData();
@@ -234,40 +239,35 @@ public class Casopisi extends javax.swing.JFrame {
        resetData();
     }//GEN-LAST:event_btnResetActionPerformed
 
-    private void casopisTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_casopisTableMouseClicked
+    private void autorTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_autorTableMouseClicked
         try {
-            casopis_id = Integer.parseInt(casopisTable.getValueAt(casopisTable.getSelectedRow(), 0).toString());
+            autor_id = Integer.parseInt(autorTable.getValueAt(autorTable.getSelectedRow(), 0).toString());
             Statement smt = conn.createStatement();
-            ResultSet rs = smt.executeQuery("select * from casopisi where casopis_id ="+casopis_id);
+            ResultSet rs = smt.executeQuery("select * from autori where autor_id ="+autor_id);
             if(rs.next()) {
-                tfNaziv.setText(rs.getString(2));
-                tfBrojIzlazaka.setText(rs.getInt(3)+"");
-                tfGodinaOsnivanja.setText(rs.getInt(4)+"");
-                tfUrednik.setText(rs.getString(5));
-                tfUkupanBrojRedakcije.setText(rs.getInt(6)+"");
+                tfDatumSlanja.setText(rs.getString(2));
+                tfDatumDobijanja.setText(rs.getString(3));
             }
             rs.close();
             smt.close();
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, ex);
         }
-    }//GEN-LAST:event_casopisTableMouseClicked
+    }//GEN-LAST:event_autorTableMouseClicked
 
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
-        if(casopis_id != 0)
+        if(autor_id != 0)
         {
-            naziv = tfNaziv.getText();
-            urednik = tfUrednik.getText();
-            broj_izlazaka = Integer.parseInt(tfBrojIzlazaka.getText());
-            godina_osnivanja = Integer.parseInt(tfGodinaOsnivanja.getText());
-            broj_osoba_redakcije = Integer.parseInt(tfUkupanBrojRedakcije.getText());
+            ime = tfDatumSlanja.getText();
+            prezime = tfDatumDobijanja.getText();
+            
             try {
                 Statement smt = conn.createStatement();
-                smt.executeUpdate("update casopisi set naziv='"+naziv+"', urednik='"+urednik+"', broj_izlazaka='"+broj_izlazaka+"', godina_osnivanja='"+godina_osnivanja+"', broj_osoba_redakcije='"+broj_osoba_redakcije+"' where casopis_id="+casopis_id);
-                JOptionPane.showMessageDialog(this, "Casopis azuriran");
+                smt.executeUpdate("update autori set ime='"+ime+"', prezime='"+prezime+"', adresa='"+adresa+"', telefon='"+telefon+"', email='"+email+"', institucija='"+institucija+"' where autor_id="+autor_id);
+                JOptionPane.showMessageDialog(this, "Autor azuriran");
                 setTableData();
                 resetData();
-                casopis_id = 0;
+                autor_id = 0;
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Ne moze se azurirati zapis..."+" "+ex.getMessage());
             }
@@ -275,63 +275,61 @@ public class Casopisi extends javax.swing.JFrame {
     }//GEN-LAST:event_btnUpdateActionPerformed
 
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
-        if(casopis_id != 0) 
+        if(autor_id != 0) 
         {
             try {
                Statement smt = conn.createStatement(); 
-               smt.execute("delete from casopisi where casopis_id = "+casopis_id);
-               JOptionPane.showMessageDialog(this, "Časopis uspješno izbrisan");
+               smt.execute("delete from autori where autor_id = "+autor_id);
+               JOptionPane.showMessageDialog(this, "Autor uspješno izbrisan");
                setTableData();
                resetData();
-               casopis_id = 0;
+               autor_id = 0;
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Zapis se ne moze izbrisati... "+ex.getMessage());
             }
         }
     }//GEN-LAST:event_btnDeleteActionPerformed
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         this.dispose();
         MainMenu mainMenu = new MainMenu();
         mainMenu.setDefaultCloseOperation(MainMenu.DISPOSE_ON_CLOSE);
         mainMenu.setSize(800, 600);
         mainMenu.setLocationRelativeTo(null);
         mainMenu.setVisible(true);
-    }//GEN-LAST:event_jButton2ActionPerformed
+    }//GEN-LAST:event_jButton1ActionPerformed
 
     private void resetData() {
-        tfNaziv.setText("");
-        tfUrednik.setText("");
-        tfBrojIzlazaka.setText("");
-        tfGodinaOsnivanja.setText("");
-        tfUkupanBrojRedakcije.setText("");
+        tfDatumSlanja.setText("");
+        tfDatumDobijanja.setText("");
     }
     private void setTableData() {
         try {
             int rows = 0;
             int rowIndex = 0;
             Statement smt = conn.createStatement();
-            ResultSet rs = smt.executeQuery("select * from casopisi order by casopis_id desc");
+            ResultSet rs = smt.executeQuery("select * from autori order by autor_id desc");
             if (rs.next()) {
                 rs.last();
                 rows = rs.getRow();
                 rs.beforeFirst();
             }
             
-            String[][] data = new String[rows][6];
+            String[][] data = new String[rows][7];
             while(rs.next())
             {
                 data[rowIndex][0] = rs.getInt(1)+"";
                 data[rowIndex][1] = rs.getString(2);
-                data[rowIndex][2] = rs.getInt(3)+"";
-                data[rowIndex][3] = rs.getInt(4)+"";
+                data[rowIndex][2] = rs.getString(3);
+                data[rowIndex][3] = rs.getString(4);
                 data[rowIndex][4] = rs.getString(5);
-                data[rowIndex][5] = rs.getInt(6)+"";
+                data[rowIndex][5] = rs.getString(6);
+                data[rowIndex][6] = rs.getString(7);
                 rowIndex++;
             }
-            String[] cols = {"ID", "Naziv", "Broj izlazaka", "Godina osnivanja", "Urednik", "Broj osoba redakcije"};
+            String[] cols = {"ID", "Ime", "Prezime", "Adresa", "Telefon", "Email", "Institucija"};
             DefaultTableModel model = new DefaultTableModel(data, cols);
-            casopisTable.setModel(model);
+            autorTable.setModel(model);
             
             rs.close();
             smt.close();
@@ -358,44 +356,39 @@ public class Casopisi extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(Casopisi.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Autori.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(Casopisi.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Autori.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(Casopisi.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Autori.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(Casopisi.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Autori.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
         //</editor-fold>
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new Casopisi().setVisible(true);
+                new Autori().setVisible(true);
             }
         });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JTable autorTable;
     private javax.swing.JButton btnAdd;
     private javax.swing.JButton btnDelete;
     private javax.swing.JButton btnReset;
     private javax.swing.JButton btnUpdate;
-    private javax.swing.JTable casopisTable;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
+    private javax.swing.JComboBox<String> cbOdluka;
+    private javax.swing.JComboBox<String> cbRecezent;
+    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextField tfBrojIzlazaka;
-    private javax.swing.JTextField tfGodinaOsnivanja;
-    private javax.swing.JTextField tfNaziv;
-    private javax.swing.JTextField tfUkupanBrojRedakcije;
-    private javax.swing.JTextField tfUrednik;
     // End of variables declaration//GEN-END:variables
 }

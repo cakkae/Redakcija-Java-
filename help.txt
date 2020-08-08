@@ -1,0 +1,9 @@
+rad_recezent
+id
+rad_id
+recezent_id
+odluka
+datum_slanja_recenzije
+datum_dobijanja_recenzije
+
+https://scontent.fsjj1-1.fna.fbcdn.net/v/t1.15752-9/106630315_1137474349945167_1270164700535530056_n.jpg?_nc_cat=109&_nc_sid=b96e70&_nc_ohc=K_YSEsU21ZAAX_Caflm&_nc_ht=scontent.fsjj1-1.fna&oh=3cc2b48374d114870c2bad86aef7d326&oe=5F525685

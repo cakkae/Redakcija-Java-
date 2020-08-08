@@ -1,8 +1,12 @@
 
 import includes.DatabaseConnection;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
@@ -21,7 +25,19 @@ public class Radovi extends javax.swing.JFrame {
         DatabaseConnection dbc = DatabaseConnection.getDatabaseConnection();
             conn = dbc.getConnection();
             setTableData();
-        
+            try {
+                String queryString = "SELECT * from casopisi";
+                Statement smt = conn.createStatement();
+                ResultSet resultSet = smt.executeQuery(queryString);
+                ResultSetMetaData metaData = resultSet.getMetaData();
+                int colCount = metaData.getColumnCount();
+                while(resultSet.next())
+                {
+                    cbCasopis.addItem(resultSet.getString(2));
+                }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(this, ex.getMessage());
+                }
     }
 
     /**
@@ -44,10 +60,6 @@ public class Radovi extends javax.swing.JFrame {
         jPanel4 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         tfNaziv = new javax.swing.JTextField();
-        jLabel3 = new javax.swing.JLabel();
-        tfDatumSlanjaRecenzije = new javax.swing.JTextField();
-        jLabel4 = new javax.swing.JLabel();
-        tfDatumPrispjecaRecenzije = new javax.swing.JTextField();
         jLabel5 = new javax.swing.JLabel();
         tfDatumPrispjecaCasopisa = new javax.swing.JTextField();
         jLabel6 = new javax.swing.JLabel();
@@ -132,19 +144,11 @@ public class Radovi extends javax.swing.JFrame {
             .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 260, Short.MAX_VALUE)
         );
 
-        jPanel4.setLayout(new java.awt.GridLayout(6, 4, 5, 10));
+        jPanel4.setLayout(new java.awt.GridLayout(5, 4, 10, 25));
 
         jLabel1.setText("Naziv:");
         jPanel4.add(jLabel1);
         jPanel4.add(tfNaziv);
-
-        jLabel3.setText("Datum slanja recenzije:");
-        jPanel4.add(jLabel3);
-        jPanel4.add(tfDatumSlanjaRecenzije);
-
-        jLabel4.setText("Datum prispjeća recenzije:");
-        jPanel4.add(jLabel4);
-        jPanel4.add(tfDatumPrispjecaRecenzije);
 
         jLabel5.setText("Datum prispjeća časopisa:");
         jPanel4.add(jLabel5);
@@ -221,8 +225,6 @@ public class Radovi extends javax.swing.JFrame {
         odluka = Integer.parseInt(tfOdluka.getText());
 //        casopis_id = Integer.parseInt(tfCasopis.getText());
         datum_prispeca_casopisa = java.sql.Date.valueOf(tfDatumPrispjecaCasopisa.getText());
-        datum_prispeca_recenzije = java.sql.Date.valueOf(tfDatumPrispjecaRecenzije.getText());
-        datum_slanja_recenzije = java.sql.Date.valueOf(tfDatumSlanjaRecenzije.getText());
         krajnja_strana = Integer.parseInt(tfKrajnjaStrana.getText());
         pocetna_strana = Integer.parseInt(tfPocetnaStrana.getText());
         redniBrojGodine = tfRBrGodine.getText();
@@ -410,8 +412,6 @@ public class Radovi extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
@@ -422,8 +422,6 @@ public class Radovi extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel4;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextField tfDatumPrispjecaCasopisa;
-    private javax.swing.JTextField tfDatumPrispjecaRecenzije;
-    private javax.swing.JTextField tfDatumSlanjaRecenzije;
     private javax.swing.JTextField tfKrajnjaStrana;
     private javax.swing.JTextField tfNaziv;
     private javax.swing.JTextField tfOdluka;

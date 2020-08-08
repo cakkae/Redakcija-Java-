@@ -148,15 +148,20 @@ public class MainMenu extends javax.swing.JFrame {
 
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
         this.dispose();
-        AutoriRadovi autoriRadovi = new AutoriRadovi();
+        /*AutoriRadovi autoriRadovi = new AutoriRadovi();
         autoriRadovi.setDefaultCloseOperation(MainMenu.DISPOSE_ON_CLOSE);
         autoriRadovi.setSize(800, 600);
         autoriRadovi.setLocationRelativeTo(null);
-        autoriRadovi.setVisible(true);
+        autoriRadovi.setVisible(true);*/
     }//GEN-LAST:event_jButton5ActionPerformed
 
     private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
-        // TODO add your handling code here:
+        this.dispose();
+        RecezentRadovi recezentRadovi = new RecezentRadovi();
+        recezentRadovi.setDefaultCloseOperation(MainMenu.DISPOSE_ON_CLOSE);
+        recezentRadovi.setSize(800, 600);
+        recezentRadovi.setLocationRelativeTo(null);
+        recezentRadovi.setVisible(true);
     }//GEN-LAST:event_jButton6ActionPerformed
 
     /**
